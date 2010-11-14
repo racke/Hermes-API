@@ -86,8 +86,6 @@ sub UserLogin {
 								 'kennwort' => $password]];
 
 	$soap_params = $self->soap_parameters($input_params);
-	use Data::Dumper;
-	print Dumper($soap_params);
 	
 	$ret = $self->ProPS('propsUserLogin', $soap_params);
 
@@ -100,8 +98,6 @@ sub OrderSave {
 	my ($soap_params, $ret);
 	
 	$soap_params = $self->order_parameters($address);
-	use Data::Dumper;
-	print Dumper($soap_params);
 	
 	$ret = $self->ProPS('propsOrderSave', $soap_params);
 
