@@ -288,6 +288,8 @@ sub soap_header {
 sub soap_parameters {
 	my ($self, $input, $level) = @_;
 	my ($key, $value, @params);
+
+	$level ||= 0;
 	
 	for (my $i = 0; $i < @$input; $i += 2) {
 		$key = $input->[$i];
