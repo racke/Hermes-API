@@ -183,20 +183,32 @@ sub ProPS {
 	return $ret->result();
 }
 
+sub search_parameters {
+	my ($self, $search) = @_;
+	my ($input, @search_parms);
+	
+	# country code conversion
+	if (ref($search) eq 'HASH' && exists $search->{countryCode}) {
+		$search->{countryCode} = $self->country_alpha3($search->{countryCode});
+	}
+
+	for (qw/orderNo identNo from to lastname city postcode countryCode clientReferenceNumber ebayNumber status/) {
+		if (exists $search->{$_} && $search->{$_} =~ /\S/) {
+			push(@search_parms, $_, $search->{$_});
+		}
+	}
+
+	$input = [searchCriteria => \@search_parms];
+	
+	return $self->soap_parameters($input);	
+}
+
 sub order_parameters {
 	my ($self, $address) = @_;
 	my ($input, @address_parms);
 
 	# country code conversion
-	if (exists $address->{countryCode} && length($address->{countryCode}) == 2) {
-		my ($lc, $lct) = @_;
-		
-		$lc = new Locale::Geocode;
-		unless ($lct = $lc->lookup($address->{countryCode})) {
-			die "Invalid country code $address->{countryCode}\n";
-		}
-		$address->{countryCode} = $lct->alpha3;
-	}
+	$address->{countryCode} = $self->country_alpha3($address->{countryCode});
 		
 	for (qw/firstname lastname street houseNumber addressAdd postcode city district countryCode email telephoneNumber telephonePrefix/) {
 		if (exists $address->{$_} && $address->{$_} =~ /\S/) {
@@ -207,6 +219,23 @@ sub order_parameters {
 	$input = [propsOrder => [receiver => \@address_parms]];
 
 	return $self->soap_parameters($input);
+}
+
+sub country_alpha3 {
+	my ($self, $code) = @_;
+	my ($lc, $lct) = @_;
+
+	if ($code && length($code) == 2) {
+		$lc = new Locale::Geocode;
+
+		unless ($lct = $lc->lookup($code)) {
+			die "Invalid country code $code\n";
+		}
+
+		$code = $lct->alpha3;
+	}
+
+	return $code;
 }
 
 sub build_url {
