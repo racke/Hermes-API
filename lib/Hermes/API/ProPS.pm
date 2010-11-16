@@ -88,10 +88,12 @@ sub UserLogin {
 
 	$soap_params = $self->soap_parameters($input_params);
 	
-	$ret = $self->ProPS('propsUserLogin', $soap_params);
+	if ($ret = $self->ProPS('propsUserLogin', $soap_params)) {
+		# set user token for further requests
+		$self->{UserToken} = $ret;
+	}
 
-	# set user token for further requests
-	$self->{UserToken} = $ret;
+	return $ret;
 }
 
 sub OrderSave {
@@ -177,20 +179,26 @@ sub ProPS {
 	}
 	
 	if ($ret->fault()) {
-		my ($detail);
-
-		use Data::Dumper;
+		my ($detail, $item);
 		
 		$detail = $ret->faultdetail();
 
 		if ($detail) {
 			# check for service exception
-			if (exists $detail->{ServiceException}) {
-				die "Service Exception: " . Dumper($detail->{ServiceException}->{exceptionItems});
+			if (exists $detail->{ServiceException}->{exceptionItems}->{ExceptionItem}) {
+				$item = $detail->{ServiceException}->{exceptionItems}->{ExceptionItem};
+
+				$self->set_error($item);
+				return;
 			}
+			use Data::Dumper;
+			print Dumper($detail);
 		}
 
 		die sprintf("SOAP Fault: %s (%s)\n", $ret->faultcode(), $ret->faultstring());
+	}
+	else {
+		$self->clear_error();
 	}
 
 	# pick up PartnerToken from response header
@@ -313,6 +321,27 @@ sub soap_parameters {
 	}
 	else {
 		return \SOAP::Data->value(@params);
+	}
+}
+
+# error handling
+sub set_error {
+	my ($self, $item) = @_;
+
+	$self->{error} = $item;
+}
+
+sub clear_error {
+	my ($self) = @_;
+
+	delete $self->{error};
+}
+
+sub get_error {
+	my ($self) = @_;
+	
+    if ($self->{error}) {
+		return $self->{error}->{errorMessage};
 	}
 }
 
