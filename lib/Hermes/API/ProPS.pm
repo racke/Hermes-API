@@ -44,7 +44,7 @@ sub initialize {
 		}
 	}
 	
-	# check for required parameters: PartnerID and PartnerPwd
+	# check for required parameters: PartnerId and PartnerPwd
 	while (@args) {
 		$key = shift @args;
 		$value = shift @args;
@@ -52,11 +52,12 @@ sub initialize {
 		if (exists $parms{$key}) {
 			$self->{$key} = $value;
 		}
-		else {
-			return;
-		}
 	}
 
+	unless (defined $self->{PartnerId} && defined $self->{PartnerPwd}) {
+		die "PartnerId and PartnerPwd parameters required for Hermes::API::ProPS objects.\n";
+	}
+	
 	# finally build URL
 	$self->{url} = $self->build_url();
 
