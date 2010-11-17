@@ -99,10 +99,10 @@ sub UserLogin {
 }
 
 sub OrderSave {
-	my ($self, $address) = @_;
+	my ($self, $address, %extra) = @_;
 	my ($soap_params, $ret);
 	
-	$soap_params = $self->order_parameters($address);
+	$soap_params = $self->order_parameters($address, %extra);
 	
 	$ret = $self->ProPS('propsOrderSave', $soap_params);
 
@@ -230,8 +230,8 @@ sub search_parameters {
 }
 
 sub order_parameters {
-	my ($self, $address) = @_;
-	my ($input, @address_parms);
+	my ($self, $address, %extra) = @_;
+	my ($input, @address_parms, @order_parms);
 
 	# country code conversion
 	$address->{countryCode} = $self->country_alpha3($address->{countryCode});
@@ -242,7 +242,15 @@ sub order_parameters {
 		}
 	}
 
-	$input = [propsOrder => [receiver => \@address_parms]];
+	$extra{receiver} = \@address_parms;
+
+	for (qw/orderNo receiver clientReferenceNumber parcelClass amountCashOnDelivery includeCashOnDelivery/) {
+		if (exists $extra{$_}) {
+			push (@order_parms, $_, $extra{$_});
+		}
+	}
+		
+	$input = [propsOrder => \@order_parms];
 
 	return $self->soap_parameters($input);
 }
