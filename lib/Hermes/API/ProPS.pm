@@ -1,3 +1,7 @@
+# Hermes::API::ProPS - Hermes API ProPS shipping module
+#
+# Copyright 2010 by Stefan Hornburg (Racke) <racke@linuxia.de>
+
 package Hermes::API::ProPS;
 
 use strict;
