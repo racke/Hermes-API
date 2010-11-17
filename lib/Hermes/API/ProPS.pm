@@ -10,6 +10,8 @@ use SOAP::Lite +trace => [transport => \&log_request];
 our %parms = (# Hermes::API authentication
 			  PartnerId => undef,
 			  PartnerPwd => undef,
+			  PartnerToken => undef,
+			  UserToken => undef,
 
 			  # Module parameters
 			  SandBox => 0,
