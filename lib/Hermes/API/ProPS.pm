@@ -6,7 +6,9 @@ use warnings;
 use Locale::Geocode;
 use SOAP::Lite +trace => [transport => \&log_request];
 #use SOAP::Lite +trace => 'all';
-	
+use IO::File;
+use MIME::Base64;
+
 our %parms = (# Hermes::API authentication
 			  PartnerId => undef,
 			  PartnerPwd => undef,
@@ -137,6 +139,44 @@ sub GetOrders {
 
 	$ret = $self->ProPS('propsGetPropsOrders', $soap_params);
 
+	return $ret;
+}
+
+sub PrintLabel {
+	my ($self, $order_number, $format, $position, $output) = @_;
+	my ($service, $input_params, $soap_params, $output_param, $ret);
+	
+	if ($format eq 'PDF') {
+		$service = 'propsOrderPrintLabelPdf';
+		$input_params = [orderNo => {value => $order_number, type => 'string'},
+						 position => $position];
+		$output_param = 'pdfData';
+	}
+	elsif ($format eq 'JPEG') {
+		$service = 'propsOrderPrintLabelJpeg';
+		$input_params = [orderNo => {value => $order_number, type => 'string'}];
+		$output_param = 'jpegData';
+	}
+
+	$soap_params = $self->soap_parameters($input_params);
+	
+	unless ($self->{UserToken}) {
+		die "UserToken required for GetOrders service.\n";
+	}
+
+	$ret = $self->ProPS($service, $soap_params);
+
+	if ($output) {
+		my ($fh, $data);
+		
+		$fh = new IO::File "> $output";
+		$data = MIME::Base64::decode_base64($ret->{$output_param});
+
+		print $fh $data;
+
+		$fh->close;
+	}
+	
 	return $ret;
 }
 
