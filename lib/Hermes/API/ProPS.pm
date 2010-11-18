@@ -149,9 +149,11 @@ sub GetOrders {
 	
 	$soap_params = $self->search_parameters($search);
 
-	$ret = $self->ProPS('propsGetPropsOrders', $soap_params);
+	if ($ret = $self->ProPS('propsGetPropsOrders', $soap_params)) {
+		return $ret->{orders}->{PropsOrderShort};
+	}
 
-	return $ret;
+	return;
 }
 
 sub PrintLabel {
