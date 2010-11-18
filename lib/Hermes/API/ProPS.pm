@@ -8,8 +8,8 @@ use strict;
 use warnings;
 
 use Locale::Geocode;
-use SOAP::Lite +trace => [transport => \&log_request];
-#use SOAP::Lite +trace => 'all';
+use SOAP::Lite;
+
 use IO::File;
 use MIME::Base64;
 
@@ -24,7 +24,11 @@ our %parms = (# Hermes::API authentication
 
 			  SandBoxHost => 'sandboxapi.hlg.de',
 			  ProductionHost => 'hermesapi2.hlg.de',
-			  APIVersion => '1.2');
+			  APIVersion => '1.2',
+
+			  # Debug/logging
+			  Trace => undef,
+			 );
 
 sub new {
 	my ($class, $self);
@@ -72,6 +76,10 @@ sub initialize {
 	# instantiate SOAP::Lite
 	$self->{soap} = new SOAP::Lite(proxy => $self->{url});
 
+	if ($self->{Trace}) {
+		$self->{soap}->import(+trace => [transport => \&log_request]);		
+	}
+	
 	return 1;		
 }
 
@@ -170,7 +178,7 @@ sub PrintLabel {
 
 	$ret = $self->ProPS($service, $soap_params);
 
-	if ($output) {
+	if ($ret && $output) {
 		my ($fh, $data);
 		
 		$fh = new IO::File "> $output";
