@@ -224,10 +224,6 @@ sub ProPS {
 	# build SOAP headers
 	@headers = $self->soap_header();
 
-	if (@params) {
-		print "Data for $service: ", $params[0]->name(), "\n";
-	}
-	
 	$ret = $self->{soap}->call($service, @params, @headers);
 
 	if ($@) {
