@@ -161,7 +161,7 @@ sub GetOrder {
 
 sub GetOrders {
 	my ($self, $search) = @_;
-	my ($input_params, $soap_params, $ret);
+	my ($input_params, $soap_params, $ret, $orders);
 	
 	unless ($self->{UserToken}) {
 		die "UserToken required for GetOrders service.\n";
@@ -170,7 +170,19 @@ sub GetOrders {
 	$soap_params = $self->search_parameters($search);
 
 	if ($ret = $self->ProPS('propsGetPropsOrders', $soap_params)) {
-		return $ret->{orders}->{PropsOrderShort};
+		$orders = $ret->{orders}->{PropsOrderShort};
+
+		if (! defined $orders) {
+			# no matches
+			return[];
+		}
+		elsif (ref($orders) eq 'HASH') {
+			# we get hash reference for single matches
+			return [$orders];
+		}
+		else {
+			return $orders;
+		}
 	}
 
 	return;
