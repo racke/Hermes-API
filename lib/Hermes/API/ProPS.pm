@@ -139,6 +139,26 @@ sub OrderDelete {
 	return $ret;
 }
 
+sub GetOrder {
+	my ($self, %parms) = @_;
+	my ($input_params, $soap_params, $ret);
+	
+	unless ($self->{UserToken}) {
+		die "UserToken required for GetOrder service.\n";
+	}
+
+	$input_params = ['orderNo' => {value => $parms{orderNo},
+								   type => 'string'},
+					 'shippingId' => {value => $parms{shippingId},
+									  type => 'string'},
+					];
+	$soap_params = $self->soap_parameters($input_params);
+
+	$ret = $self->ProPS('propsGetPropsOrder', $soap_params);
+	
+	return $ret;
+}
+
 sub GetOrders {
 	my ($self, $search) = @_;
 	my ($input_params, $soap_params, $ret);
