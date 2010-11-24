@@ -223,7 +223,7 @@ sub PrintLabel {
 		$fh->close;
 	}
 	
-	return $ret;
+	return $ret->{$output_param};
 }
 
 sub ProductInformation {
