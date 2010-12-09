@@ -10,6 +10,7 @@ use warnings;
 use Locale::Geocode;
 use SOAP::Lite;
 
+use DateTime;
 use IO::File;
 use MIME::Base64;
 
@@ -224,6 +225,37 @@ sub PrintLabel {
 	}
 	
 	return $ret->{$output_param};
+}
+
+sub GetCollectionOrders {
+	my ($self, $date_from, $date_to, $large) = @_;
+	my (@collection_params, $soap_params, $ret);
+
+	unless ($date_from) {
+		$date_from = DateTime->now()->iso8601();
+	}
+
+	unless ($date_to) {
+		$date_to = DateTime->now()->add(months => 3)->iso8601();
+	}
+
+	unless (defined $large) {
+		$large = 0;
+	}
+
+	@collection_params = (collectionDateFrom => $date_from,
+						  collectionDateTo => $date_to,
+						  onlyMoreThan2ccm => $large);
+
+	$soap_params = $self->soap_parameters(\@collection_params);
+
+	unless ($self->{UserToken}) {
+		die "UserToken required for GetOrders service.\n";
+	}
+	
+	$ret = $self->ProPS('propsGetCollectionOrders', $soap_params);
+
+	return $ret;
 }
 
 sub ProductInformation {
