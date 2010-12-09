@@ -391,6 +391,25 @@ sub soap_parameters {
 	my ($key, $value, @params);
 
 	$level ||= 0;
+
+	if (@$input > 2 && $level == 0) {
+		# build XML string and pass to SOAP::Data
+		my $xml;
+		
+		for (my $i = 0; $i < @$input; $i += 2) {
+			$key = $input->[$i];
+			$value = $input->[$i+1];
+
+			if (ref($value) eq 'HASH') {
+				$xml .= qq{<$key>$value->{value}</$key>};
+			}
+			else {
+				$xml .= qq{<$key>$value</$key>};
+			}
+		}
+
+		return SOAP::Data->type(xml => $xml);
+	}
 	
 	for (my $i = 0; $i < @$input; $i += 2) {
 		$key = $input->[$i];
