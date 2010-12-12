@@ -229,7 +229,7 @@ sub PrintLabel {
 
 sub GetCollectionOrders {
 	my ($self, $date_from, $date_to, $large) = @_;
-	my (@collection_params, $soap_params, $ret);
+	my (@collection_params, $soap_params, $orders, $ret);
 
 	unless ($date_from) {
 		$date_from = DateTime->now()->iso8601();
@@ -253,9 +253,23 @@ sub GetCollectionOrders {
 		die "UserToken required for GetOrders service.\n";
 	}
 	
-	$ret = $self->ProPS('propsGetCollectionOrders', $soap_params);
+	if ($ret = $self->ProPS('propsGetCollectionOrders', $soap_params)) {
+		$orders = $ret->{orders}->{PropsCollectionOrderLong};
 
-	return $ret;
+		if (! defined $orders) {
+			# no matches
+			return[];
+		}
+		elsif (ref($orders) eq 'HASH') {
+			# we get hash reference for single matches
+			return [$orders];
+		}
+		else {
+			return $orders;
+		}
+	}
+
+	return;
 }
 
 sub ProductInformation {
