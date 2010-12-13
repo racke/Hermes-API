@@ -322,6 +322,17 @@ sub GetCollectionOrders {
 	return;
 }
 
+sub ReadShipmentStatus {
+	my ($self, $shipid) = @_;
+	my ($soap_params, $ret);
+
+	$soap_params = $self->soap_parameters([shippingId => {value => $shipid, type => 'string'}]);
+
+	if ($ret = $self->ProPS('propsReadShipmentStatus', $soap_params)) {
+		return $ret;
+	}
+}
+
 sub ProductInformation {
 	my ($self) = @_;
 	my ($ret);
