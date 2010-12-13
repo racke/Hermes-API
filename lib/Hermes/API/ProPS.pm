@@ -260,6 +260,23 @@ sub CollectionRequest {
 	return;
 }
 
+sub CollectionCancel {
+	my ($self, $date) = @_;
+	my ($soap_params, $ret);
+
+	unless ($self->{UserToken}) {
+                die "UserToken required for CollectionCancel service.\n";
+        }
+
+	$soap_params = $self->soap_parameters([collectionDate => $date]);
+
+	if ($ret = $self->ProPS('propsCollectionCancel', $soap_params)) {
+                return $ret;
+        }
+
+        return;
+}
+
 sub GetCollectionOrders {
 	my ($self, $date_from, $date_to, $large) = @_;
 	my (@collection_params, $soap_params, $orders, $ret);
