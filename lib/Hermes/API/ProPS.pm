@@ -196,7 +196,7 @@ sub PrintLabel {
 	if ($format eq 'PDF') {
 		$service = 'propsOrderPrintLabelPdf';
 		$input_params = [orderNo => {value => $order_number, type => 'string'},
-						 position => $position];
+						 position => ($position || 1)];
 		$output_param = 'pdfData';
 	}
 	elsif ($format eq 'JPEG') {
