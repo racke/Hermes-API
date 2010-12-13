@@ -227,6 +227,39 @@ sub PrintLabel {
 	return $ret->{$output_param};
 }
 
+sub CollectionRequest {
+	my ($self, $date, %parcel_counts) = @_;
+	my (@request_parms, $soap_params, $name, $count, $ret);
+
+	push (@request_parms, collectionDate => $date);
+
+	# parameters for collection request
+	for (qw/XS S M L XL XXL/) {
+		$name = "numberOfParcelsClass_$_";
+
+                if (exists $parcel_counts{$_}) {
+			$count = $parcel_counts{$_};
+		}
+		else {
+			$count = 0;
+		}
+
+		push (@request_parms, $name, $count);
+	}
+ 
+	unless ($self->{UserToken}) {
+                die "UserToken required for CollectionRequest service.\n";
+        }
+
+	$soap_params = $self->soap_parameters([collectionOrder => \@request_parms]);
+
+        if ($ret = $self->ProPS('propsCollectionRequest', $soap_params)) {
+		return $ret;
+	}
+
+	return;
+}
+
 sub GetCollectionOrders {
 	my ($self, $date_from, $date_to, $large) = @_;
 	my (@collection_params, $soap_params, $orders, $ret);
