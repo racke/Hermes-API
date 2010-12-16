@@ -400,16 +400,24 @@ sub ProPS {
 
 sub search_parameters {
 	my ($self, $search) = @_;
-	my ($input, @search_parms);
+	my ($input, @search_parms, %address_parms);
 	
 	# country code conversion
 	if (ref($search) eq 'HASH' && exists $search->{countryCode}) {
 		$search->{countryCode} = $self->country_alpha3($search->{countryCode});
 	}
 
+	%address_parms = (lastname => 1, city => 1);
+	
 	for (qw/orderNo identNo from to lastname city postcode countryCode clientReferenceNumber ebayNumber status/) {
 		if (exists $search->{$_} && $search->{$_} =~ /\S/) {
-			push(@search_parms, $_, $search->{$_});
+			if (exists $address_parms{$_}) {
+				# force type to "string" in order to avoid base64 encoding
+				push(@search_parms, $_, {value => $search->{$_}, type => 'string'});
+			}
+			else {
+				push(@search_parms, $_, $search->{$_});
+			}
 		}
 	}
 
@@ -427,7 +435,8 @@ sub order_parameters {
 		
 	for (qw/firstname lastname street houseNumber addressAdd postcode city district countryCode email telephoneNumber telephonePrefix/) {
 		if (exists $address->{$_} && $address->{$_} =~ /\S/) {
-			push(@address_parms, $_, $address->{$_});
+			# force type to "string" in order to avoid base64 encoding
+			push(@address_parms, $_, {value => $address->{$_}, type => 'string'});
 		}
 	}
 
