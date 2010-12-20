@@ -7,6 +7,8 @@ package Hermes::API::ProPS;
 use strict;
 use warnings;
 
+use Log::Dispatch;
+
 use Locale::Geocode;
 use SOAP::Lite;
 
@@ -70,6 +72,13 @@ sub initialize {
 	unless (defined $self->{PartnerId} && defined $self->{PartnerPwd}) {
 		die "PartnerId and PartnerPwd parameters required for Hermes::API::ProPS objects.\n";
 	}
+
+	# log dispatcher
+	my @outputs;
+
+	@outputs = (['Screen', min_level => 'debug']);
+	
+	$self->{log} = new Log::Dispatch(outputs => \@outputs);
 	
 	# finally build URL
 	$self->{url} = $self->build_url();
@@ -78,7 +87,8 @@ sub initialize {
 	$self->{soap} = new SOAP::Lite(proxy => $self->{url});
 
 	if ($self->{Trace}) {
-		$self->{soap}->import(+trace => [transport => \&log_request]);		
+		my $request_sub = sub {$self->log_request(@_)};
+		$self->{soap}->import(+trace => [transport => $request_sub]);		
 	}
 	
 	return 1;		
@@ -573,14 +583,14 @@ sub get_error {
 }
 
 sub log_request {
-	my ($in) = @_;
+	my ($self, $in) = @_;
 	
     if (ref($in) eq "HTTP::Request") {
 		# do something...
-		print $in->as_string; # ...for example
+		$self->{log}->debug($in->as_string);
     } elsif (ref($in) eq "HTTP::Response") {
 		# do something
-		print $in->as_string;
+		$self->{log}->debug($in->as_string);
     }
 }
 
