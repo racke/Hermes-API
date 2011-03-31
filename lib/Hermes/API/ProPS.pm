@@ -577,9 +577,14 @@ sub clear_error {
 sub get_error {
 	my ($self) = @_;
 	
-    if ($self->{error}) {
+	if (ref($self->{error}) eq 'ARRAY') {
+        	return join("\n", map {$_->{errorMessage}} @{$self->{error}});
+    	}
+	if ($self->{error}) {
 		return $self->{error}->{errorMessage};
 	}
+
+	return "No error defined";
 }
 
 sub log_request {
