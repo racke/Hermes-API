@@ -1,6 +1,6 @@
 # Hermes::API::ProPS - Hermes API ProPS shipping module
 #
-# Copyright 2010 by Stefan Hornburg (Racke) <racke@linuxia.de>
+# Copyright 2010,2011 by Stefan Hornburg (Racke) <racke@linuxia.de>
 
 package Hermes::API::ProPS;
 
@@ -15,6 +15,8 @@ use SOAP::Lite;
 use DateTime;
 use IO::File;
 use MIME::Base64;
+
+our $VERSION = '0.1300';
 
 our %parms = (# Hermes::API authentication
 			  PartnerId => undef,
