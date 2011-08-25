@@ -27,7 +27,7 @@ our %parms = (# Hermes::API authentication
 
 			  SandBoxHost => 'sandboxapi.hlg.de',
 			  ProductionHost => 'hermesapi2.hlg.de',
-			  APIVersion => '1.2',
+			  APIVersion => '1.3',
 
 			  # Debug/logging
 			  Trace => undef,
